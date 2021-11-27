@@ -1,0 +1,2643 @@
+
+
+Miner 2149 Version
+	The following software code is provided for your personal information only.  You may not modify or copy or distribute this code without the author's written permission. The code is separated by a line of plus (+) signs to indicate where a memopad record starts and stops. This software was compiled on Pocket C 3.01
+
+-Michael Baker
+
+
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+//Miner 2149
+/*45K*/
+
+int a,b,c,d,play,screen,aloop,restart;
+int mday,tday,level,iloop,diff,x,y;
+int one[100],two[100],three[101],dl[6];
+int llevel,lloc,lobject,hiscore,asave;
+string object[17],oname[17],hiname,m[6],version;
+int ocost[17],ocount[17],phrase,gamename;
+int worker,credits,morale,life,jobs,wage,lost,day,oscroll,smax;
+int product,meff,eff,lworker,lmorale,lproduct,leff,ljobs,drate,sellprice;
+int occ,food,health,crdflg,loadflg;
+float spfloat;
+
+/*include "ButtonsGlobals.h"
+include "ButtonsFunctions.c"*/
+include "Miner library0a"
+include "Miner library0b"
+include "Miner library0c"
+include "Miner Splash()"
+include "Miner library0d"
+include "Miner library0e"
+include "Miner library0f"
+include "Miner library1a"
+include "Miner library1b"
+include "Miner library1c"
+include "Miner library2"
+include "Miner library3"
+include "Miner library4a"
+include "Miner library4b"
+include "Miner library4c"
+include "Miner library4d"
+include "Miner library5a"
+include "Miner library5b"
+include "Miner AniDisaster"
+include "Miner library6"
+include "Miner library7"
+include "Miner library8"
+
+main(){
+	clear();
+	puts("Miner 2149 © 1998 by Michael Baker.  All rights reserved.");
+	hookhard(1);
+	hookmenu(1);
+	smax=16;
+	asave=1;
+	restart=RegCheck();
+	if (restart==1) Splash(1);
+	while(restart==1){
+	play=1;
+	Startup();
+	MainSetup();
+	DrawMap();
+	while(play==1){
+	aloop=Action();
+	if (aloop>0){
+		Advance(aloop);
+	}
+	if (play==1)
+		play=CheckEvent();
+	}
+	restart=EndGame(play);
+	play==0;
+	}
+	exit();
+	launch("lnch");
+}
+
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+/$ButtonsFunctions.c
+
+
+ButtonsSetup()
+{
+	ButtonDepth=14;
+	graph_on();
+	NButtons=0;
+	title("---------");
+}
+
+WhichButton()
+{
+int x,y,i;
+	x=penx();
+	y=peny();
+	for(i=0;i<NButtons;i++)
+	{
+	if(!ButtonState[i]) continue;
+	if((x>ButtonX[i])&&(x<ButtonX1[i])&&(y>ButtonY[i])&&(y<ButtonY1[i])) return i;
+	}
+	return -1;
+}
+
+MakeButton(int x,int y,int length,string txt,int color)
+{
+if(length==0) length=strlen(txt)*6+3; frame(color,x,y,(x+length),(y+ButtonDepth),3);
+textattr(0,color,0);
+text((x+2),(y+2),txt);
+textattr(0,1,0);
+ButtonX[NButtons]=x;
+ButtonY[NButtons]=y;
+ButtonX1[NButtons]=x+length;
+ButtonY1[NButtons]=y+ButtonDepth;
+ButtonText[NButtons]=txt;
+ButtonState[NButtons]=color;
+++NButtons;
+}
+
+HideButton(int b)
+{
+frame(0,ButtonX[b],ButtonY[b],ButtonX1[b],ButtonY1[b],3);
+textattr(0,0,0);
+text((ButtonX[b]+2),(ButtonY[b]+2),ButtonText[b]);
+textattr(0,1,0);
+ButtonState[b]=0;
+}
+
+ShowButton(int b)
+{
+frame(1,ButtonX[b],ButtonY[b],ButtonX1[b],ButtonY1[b],3);
+textattr(0,1,0);
+text((ButtonX[b]+2),(ButtonY[b]+2),ButtonText[b]);
+ButtonState[b]=1;
+}
+
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+/$ButtonsGlobals.h
+int NButtons, ButtonDepth;
+int ButtonX[20], ButtonY[20], ButtonX1[20],ButtonY1[20],ButtonState[20];
+string ButtonText[20];
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+/$Miner AniDisaster
+Crash(){
+int a;
+Splash(0);
+textattr(2,1,1);
+textalign(01);
+text(80,15,"Disaster Alert:");
+textattr(1,1,0);
+for (a=60;a<135;a=a+1){
+bitmap(80,a,"0a1e02102103f04084087f8210210528");
+sleep(100);
+if (a==61) text(80,40,"\"Control: You're too fast!\"");
+if (a==90) text(80,40,"\"Shuttle Craft: Engines out!\"");
+if (a==110) text(80,40,"\" Control: Brace for impact! \"");
+rect(0,80,a,90,a+10,0);
+}
+bitmap(80,135,"0a0000e01102f040c884dec924210528");
+sleep(300);
+bitmap(80,135,"0a0000000000000000401281b0a54508");
+sleep(900);
+textalign(00);
+textattr(0,1,0);
+}
+Pexplode(){
+int a;
+Splash(0);
+textattr(2,1,1);
+textalign(01);
+text(80,15,"Disaster Alert:");
+textattr(1,1,0);
+text(80,40,"\"Red line on four!\"");
+rect(1,100,55,101,130,0);
+for(a=1;a<10;a=a+1){
+bitmap(95,135,"0a0000106285484884087f85e8738738");
+if (a==5) text(80,40,"\"It's going to blow!\"");
+sleep(300);
+bitmap(95,135,"0a1002804584284084087f85e8738738");
+sleep(300);
+}
+textalign(00);
+textattr(0,1,0);
+bitmap(94,133,"0c2005008914aa2452054444043bcaf419d398");
+sleep(400);
+bitmap(93,131,"0e2000001060080040400002201000150020c820201dc016a80ce09ec4");
+sleep(400);
+bitmap(92,129,"1000000000000000000020100000000010000081000000080215602ad84624af7b");
+sleep(400);
+bitmap(91,127,"10000000000000000000000000000000000000000000000a4016686bd44326afe5");
+sleep(600);
+}
+Cavein(){
+Splash(0);
+textalign(01);
+textattr(2,1,1);
+text(80,15,"Disaster Alert:");
+textattr(1,1,0);
+text(80,40,"\"Look out! Mine cave-in!\"");
+textalign(00);
+rect(1,30,55,31,122,0);
+bitmap(28,122,"0b0e01101102a82482a831860c5144a44448a2912a0ac06");
+sleep(900);
+bitmap(28,122,"0b0600901101a82482a831820c5144a44444a2892b0ac06");
+sleep(700);
+bitmap(28,122,"0b0000600901182a82482a811410c69445442285298ae06");
+sleep(700);
+bitmap(28,122,"0b0000001802405204a03601300981083082d44229dae06");
+sleep(700);
+bitmap(28,122,"0b0000000000000000003c04a08107a81683142e449af06");
+sleep(700);
+bitmap(28,122,"0b0000000000000000000000000000401b028834cdb4a0e");
+sleep(700);
+textalign(00);
+}
+Storm(int a){
+int b,c,d,e,f,g,h,x,y,p,pmax,spd;
+spd=30-(diff*6);
+b=ocount[6]+(ocount[7]*5)+(ocount[8]*5)+(ocount[10]*7)+(ocount[12]*1)+(ocount[14]*10)+(ocount[15]*3)+(ocount[16]*1);
+	p=100*(ocount[13]*100)/b;
+	if ((p>100)||(mday<21)) p=100;
+pmax=p;
+if(p==0) p=1;
+if(mday<21) p=100;
+Splash(0);
+textalign(01);
+textattr(2,1,1);
+text(80,15,"Disaster Alert:");
+textattr(1,1,0);
+text(80,40,"\"Warning: Meteor Storm! \"");
+rect(0,5,147,154,157,0);
+for(d=10;d<72;d=d+1){
+if(d==37) text(80,40,"\"Preparing Laser Platform! \"");
+bitmap(d,147,"0f3ff840149112844a40043ff85114aaaa51143ff8");
+line(0,d-1,147,d-1,156);
+sleep(100);
+beep(7);
+}
+bitmap(d,145,"0f3ff840149112844a40043ff85114aaaa51143ff8");
+rect(0,d,153,d+15,157,0);
+line(0,d-1,145,d-1,155);
+sleep(100);
+rect(1,119,147,151,153,0);
+beep(4);
+text(80,40,"\"Target Incoming Meteors! \"");
+f=0;
+g=a;
+for(d=0;d<a;d=d+1){
+bitmap(72,140,"0f010012900aa007c004407ff880149112844e40043ff85114aaaa51143ff8");
+b=random(130)+10;
+e=1-random(3);
+h=1+random(2);
+for(c=60;c<133;c=c+h){
+/*bitmap(b,c,"0a0002d0528884428a505284048445a8250");*/
+bitmap(b,c,"0a0000000c01202201102501a0000000");
+if((p<=15)&&(p>1)){
+text(80,40,"\"Warning: Power Levels Low!\"");
+p=p+1;
+}
+if((p<=1)&&(f!=0)){
+rect(0,3,40,7,50,0);
+text(80,40," \"WARNING:  Power Drained!\" ");
+spd=0;
+h=3;
+}
+if((pstate()==1)&&(f<=0)&&(p>0)){
+p=p-7;
+f=30-(p/4);
+rect(0,120,148,150,152,0);
+x=penx();
+y=peny();
+if(y>140) y=140;
+if(y<60) y=60;
+line(1,80,140,x-1,y);
+line(1,80,140,x+1,y);
+beep(4);
+sleep(15);
+line(0,80,140,x-1,y);
+line(0,80,140,x+1,y);
+if ((x>(b+1))&&(x<(b+9))&&(y+1>c)&&(y<(c+9))){
+bitmap(b,c,"0a1286000088004088040044000a8210");
+beep(3);
+sleep(25);
+rect(0,b,c,b+10,c+10,0);
+c=133;
+b=0;
+g=g-1;
+}
+}
+else sleep(spd);
+if(p>0)f=f-1;
+if(f<0) f=0;
+rect(1,120,147,150-f,153,0);
+b=b+e;
+if(((b<5)||(b>145))&&(c!=133)){
+rect(0,b,c,b+10,c+10,0);
+ c=133;
+}
+}
+if((b>=5)&&(b<=145)){
+bitmap(b,c,"0a4100004080401109002b0c484a8210");
+sleep(200);
+bitmap(b-2,c,"0e0000000000000e80114030302850478848a4a214");
+}
+}
+if(p<pmax) eff=((p*jobs/100)+eff)/2;
+textalign(00);
+textattr(0,1,0);
+return g;
+}
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+/$Miner Splash()
+
+Splash(int d){
+	graph_on();
+	clearg();
+	rect(0,0,0,160,160,0);
+	frame(1,1,1,159,159,5);
+	frame(1,3,3,157,157,5);
+	bitmap(5,130,"310000000000000000000000000000000000000000000000000c00d76d9773b9eb00040603005e080001000013f100100190022d28048066004000095a8810575298200120820e080c00100840e000000200481c20000020050380000007ffffffc00001000007000000000080e0800");
+	bitmap(50,130,"32000008000000000008800000003c008800007804203fe0000840a12bfeb33542c81035640010200093fe400a014ffffffffffffc00000040040005b3f376eb3fac008000400100000800007f8000010000580680000000013f2400020000180600002000047f81000000000000000");
+	bitmap(100,130,"330000000004000000000000000004000000000000f000000000008967de1a757fe1fa00301800009090000070000ffcc0000040000000003c010009dd27024f34de000085fcc0040080047fc20038040024f8100060200000000000000010000400000800800020000000000000000");
+	textattr(0,1,0);
+	textalign(1);
+	text(80,146,"Hi Score:"+hiscore+" by "+hiname);
+	textalign(0);
+	if(d!=0){
+	loadflg=0;
+	textattr(2,1,1);
+	textalign(1);
+	text(80,5,"Miner 2149 vr. 3.0");
+	textattr(0,1,0);
+	text(80,25,"© 1998-99 by Michael Baker");
+	if (hiname=="Unregistered"){
+	text(80,37,"30 day trial version.");
+	text(80,49,"Register for only $12");
+	text(80,61,"www.Bprojects.com");
+	}
+	else{
+	text(80,37,"Please support shareware");
+	text(80,49,"Thank you for registering");
+	text(80,61,"www.Bprojects.com");
+	}
+	frame(1,50,75,110,87,3);
+	text(80,75,"New Mine");
+	frame(1,50,92,110,104,3);
+	text(80,92,"Load Mine");
+	frame(1,50,109,110,121,3);
+	text(80,109,"Instructions");
+	textalign(0);
+	a==0;
+	while(a==0){
+	waitp();
+	saveg();
+	x=penx();
+	y=peny();
+	if ((x>=50)&&(x<=110)&&(y>=75)&&(y<=87)){
+	Flash(50,75,110,87,3);
+	a=dbopen("MinerGame");
+	if(a!=0){
+		saveg();
+		a=confirm("Starting a new mining colony will overwrite an active mining colony. Do you wish to proceed?");
+		if(a==1) return;
+		else restoreg();
+	}
+	else return;
+	}
+		if ((x>=50)&&(x<=110)&&(y>=92)&&(y<=104)){
+		Flash(50,92,110,104,3);
+			rect(0,0,13,108,157,3);
+		frame(1,4,17,104,153,3);
+		frame(1,2,15,106,155,3);
+			loadflg=Sfile(1)+1;
+			restoreg();
+			if (loadflg==1) return;
+		}
+		if ((x>=50)&&(x<=110)&&(y>=109)&&(y<=122)){
+		Flash(50,109,110,121,3);
+		Instruct();
+	restoreg();
+		}
+		}
+	}
+}
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+/$Miner library0a
+
+Flash(int a,int b,int c,int d,int e){
+rect(3,a,b,c,d,e);
+beep(7);
+sleep(20);
+rect(3,a,b,c,d,e);
+}
+Info(){
+		alert("Miner 2149\n©1998-99 by M. Baker\n•••••••••••••••••••••••\nTechnical Support & Registration at:\nwww.Bprojects.com\nminer@Bprojects.com\n•••••••••••••••••••••••\nYour $12 registration supports shareware.");
+}
+Load(string filename){
+int b;
+b=dbopen(filename);
+if (b==0){
+	alert("ERROR: That file does not exist.");
+	return 1;
+	}
+rect(0,18,66,142,105,4);
+frame(1,18,66,142,105,4);
+frame(1,20,68,140,103,4);
+text(25,73,"Preparing Mining Colony...");
+frame(1,25,88,135,98,0);
+if (filename!="MinerGame") gamename=dbread("s");
+rect(1,25,88,40,98,0);
+for (b=1;b<101;b=b+1){
+one[b]=dbread("i");
+two[b]=dbread("i");
+three[b]=dbread("i");
+line(1,(b/2)+40,88,(b/2)+40,98);
+}
+mday=dbread("i");
+level=dbread("i");
+oscroll=dbread("i");
+credits=dbread("i");
+eff=dbread("i");
+product=dbread("i");
+lmorale=dbread("i");
+morale=dbread("i");
+lworker=dbread("i");
+worker=dbread("i");
+jobs=dbread("i");
+wage=dbread("i");
+life=dbread("i");
+sellprice=dbread("i");
+spfloat=sellprice;
+occ=dbread("i");
+food=dbread("i");
+health=dbread("i");
+drate=dbread("i");
+crdflg=dbread("i");
+diff=dbread("i");
+meff=dbread("i");
+dbclose();
+if(meff<10) meff=109-(diff*9);
+for (b=0;b<17;b=b+1){
+	ocount[b]=0;
+	}
+	for (b=1;b<101;b=b+1){
+	if (one[b]<=smax)
+		ocount[one[b]]=ocount[one[b]]+1;
+	if (two[b]<=smax)
+		ocount[two[b]]=ocount[two[b]]+1;
+	if (three[b]<=smax)
+		ocount[three[b]]=ocount[three[b]]+1;
+	line(1,(b/2)+85,88,(b/2)+85,98);
+	}
+	lmorale=morale;
+	lworker=worker;
+	return 1;
+}
+
+/*Restore(){
+b=dbopen("MinerGame");
+if (b==0)
+	return;
+dbclose();
+b=confirm("An autosaved mining colony has been detected. Do you want to continue with your previous operation?");
+if (b==0)
+	return;
+rect(0,2,74,150,122,0);
+text(30,92,"Preparing mining colony . . .");
+Load("MinerGame");
+return 1;
+}*/
+Instruct(){
+int x,y,z;
+rect(0,0,0,160,160,0);
+frame(1,1,1,159,159,3);
+frame(1,3,3,157,157,3);
+textattr(2,1,1);
+textalign(01);
+text(80,5,"Miner Instructions:");
+textalign(00);
+textattr(1,1,0);
+text(8,20,"Object:");
+text(8,56,"Building:");
+text(8,92,"Advance:");
+text(8,116,"Reports:");
+textattr(0,1,0);
+text(50,20,"To build a successful");
+text(8,32,"mining colony and make money by");
+text(8,44,"selling processed diridium.");
+text(55,56,"Use the bulldozer to");
+text(8,68,"clear a space. Next, select a building.");
+text(8,80,"Then, tap the map to build it.");
+text(57,92,"The advance bar");
+text(8,104,"advances time 1,7, or 14 days.");
+text(55,116,"Use the reports bar to");
+text(8,128,"monitor your colony's progress.");
+textalign(01);
+frame(1,20,142,66,153,3);
+text(43,142,"OK");
+frame(1,94,142,140,153,3);
+text(118,142,"Register");
+while (1==1){
+waitp();
+x=penx();
+y=peny();
+if((x>20)&&(x<66)&&(y>142)&&(y<153)){
+Flash(20,142,66,153,3);
+ return;
+}
+if(((x>94)&&(x<140))&&((y>142)&&(y<153))){
+Flash(94,142,140,153,3);
+z=gets("Please enter registration code:");
+if (z==11496) alert("Thank you for registering this program and encouraging shareware development. ");
+else alert("You have entered an incorrect registration code. Only registered users may use this program beyond the trial period. Please register.");
+return;
+}
+else beep(3);
+}
+}
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+/$Miner library0b
+Save(string filename,string note){
+	int b;
+	b=dbcreate(filename);
+	if (b==0)
+		alert("Error: Unable to save game. Check available system memory.");
+rect(0,18,66,142,105,4);
+frame(1,18,66,142,105,4);
+frame(1,20,68,140,103,4);
+text(25,73,"Saving Mining Colony...");
+frame(1,25,88,135,98,0);
+if (filename!="MinerGame") 
+dbwrite(note);
+rect(1,25,88,36,98,0);
+	for (b=1;b<101;b=b+1){
+	dbwrite(one[b]);
+	dbwrite(two[b]);
+	dbwrite(three[b]);
+line(1,b+35,88,b+35,98);
+	}
+			
+	dbwrite(mday);
+	dbwrite(level);
+	dbwrite(oscroll);
+	dbwrite(credits);
+	dbwrite(eff);
+	dbwrite(product);
+	dbwrite(lmorale);
+	dbwrite(morale);
+	dbwrite(lworker);
+	dbwrite(worker);
+	dbwrite(jobs);
+	dbwrite(wage);
+	dbwrite(life);
+	dbwrite(sellprice);
+	dbwrite(occ);
+	dbwrite(food);
+	dbwrite(health);
+	dbwrite(drate);
+	dbwrite(crdflg);
+	dbwrite(diff);
+	dbwrite(meff);
+	dbclose();
+rect(1,25,88,135,98,0);
+}
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+/$Miner library0c
+Sfile(int x){
+int a,b;
+string s;
+rect(0,5,18,103,152,3);
+/* 1=load 2=save */
+textalign(01);
+frame(1,12,44,96,57,4);
+a=dbopen("MinerGame");
+if(a==0) text(55,45,"Empty Auto Slot");
+else
+text(55,45,"Auto Save Slot");
+frame(1,12,64,96,77,4);
+a=dbopen("MinerGame1");
+if (a==0) text(55,65,"Empty Slot 1");
+else{
+ s=dbread("s");
+ s=strleft(s,17);
+  text(55,65,s);
+}
+dbclose();
+
+frame(1,12,84,96,97,4);
+a=dbopen("MinerGame2");
+if (a==0) text(55,85,"Empty Slot 2");
+else{
+ s=dbread("s");
+ s=strleft(s,17);
+  text(55,85,s);
+}
+dbclose();
+
+frame(1,12,104,96,117,4);
+a=dbopen("MinerGame3");
+if (a==0) text(55,105,"Empty Slot 3");
+else{
+ s=dbread("s");
+ s=strleft(s,17);
+  text(55,105,s);
+}
+dbclose();
+textalign(00);
+frame(1,34,137,74,148,4);
+text(41,137,"Cancel");
+textattr(1,1,1);
+if (x==1){
+text(35,20,"Load Mine");
+textattr(0,1,0);
+bitmap(20,20,"0bffe80283a81aa2a9028a28a28e2802ffe");
+while(1==1){
+ waitp();
+ x=penx();
+ y=peny();
+ if((x>12)&&(x<97)){
+  if((y>43)&&(y<58)){
+  Flash(12,44,96,57,4);
+  a=dbopen("MinerGame");
+  if(a==0) beep(3) ;
+  else{
+  dbclose();
+  Load("MinerGame");
+  return;
+  }
+ }
+ if((y>63)&&(y<78)){
+  Flash(12,64,96,77,4);
+  a=dbopen("MinerGame1");
+  if(a==0) beep(3);
+  else{
+  dbclose();
+  Load("MinerGame1");
+  return;
+  }
+ }
+ if((y>83)&&(y<98)){
+  Flash(12,84,96,97,4);
+  a=dbopen("MinerGame2");
+  if(a==0) beep(3) ;
+  else{
+  dbclose();
+  Load("MinerGame2");
+  return;
+  }
+ }
+ if((y>103)&&(y<118)){
+  Flash(12,104,96,117,4);
+  a=dbopen("MinerGame3");
+  if(a==0) beep(3) ;
+  else{
+  dbclose();
+  Load("MinerGame3");
+  return;
+  }
+ }
+}
+ if((x>34)&&(x<74)&&(y>137)&&(y<148)){
+   Flash(34,137,74,148,4);
+   return 1;
+ }
+}
+}
+else{
+text(35,20,"Save Mine");
+textattr(0,1,0);
+bitmap(20,20,"0bffe80282a832a3a9028a28a28e2802ffe");
+while(1==1){
+ waitp();
+ x=penx();
+ y=peny();
+ if((x>12)&&(x<97)){
+  if((y>43)&&(y<58)){
+  Flash(12,44,96,57,4);
+  s=date(1)+"-"+time(1);
+  Save("MinerGame",s);
+  return;
+ }
+ if((y>63)&&(y<78)){
+  Flash(12,64,96,77,4);
+  a=confirm("Would you like to enter a personalized comment for this game?");
+  s="";
+  if (a==1)
+  s=gets("Please enter a comment:");
+  if (s=="") s="Day:"+mday+" | Class:"+diff;
+  if (s!=""){
+  Save("MinerGame1",s);
+  return;
+  }
+ }
+ if((y>83)&&(y<98)){
+  Flash(12,84,96,97,4);
+  a=confirm("Would you like to enter a personalized comment for this game?");
+  s="";
+  if (a==1)
+  s=gets("Please enter a comment:");
+  if (s=="") s="Day:"+mday+" | Class:"+diff;
+  if (s!=""){
+  Save("MinerGame2",s);
+  return;
+  }
+ }
+ if((y>103)&&(y<118)){
+  Flash(12,104,96,117,4);
+  a=confirm("Would you like to enter a personalized comment for this game?");
+  s="";
+  if (a==1)
+  s=gets("Please enter a comment:");
+  if (s=="") s="Day:"+mday+" | Class:"+diff;
+  if (s!=""){
+  Save("MinerGame3",s);
+  return;
+  }
+  }
+ }
+
+ if((x>34)&&(x<74)&&(y>137)&&(y<148)){
+   Flash(34,137,74,148,4);
+   return;
+ }
+}
+}
+textattr(0,1,0);
+}
+
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+/$Miner library0d
+
+Launch(){
+
+int x,y,a,b;
+rect(0,0,0,160,160,0);
+frame(1,10,10,150,150,4);
+frame(1,12,12,148,148,4);
+textalign(01);
+textattr(2,1,0);
+text(79,15,"Launch Control");
+textalign(00);
+textattr(0,1,0);
+text(16,35,"  You may now launch up to 5");
+text(16,50,"probes to gather information");
+text(16,65,"about the nearby asteroids.");
+text(16,80,"Then select a site to build your");
+text(16,95,"your mining colony. Each probe");
+text(16,110,"costs 17,000 credits to launch.");
+bitmap(29,125,"630fffffffffff000ffffffffe010000000000080100000000102000000040e040200000000084000000001f020400000000048000000043f810810000010028000000007fc1081000001002800000004ffe1081074b8dc028000000"+"000001081094a51202800000004ffe1081094a512028000000007fc1081094a512028000000043f81081e73a4d2024000000001f020400000000042000000040e0402000000000810000000000080100000000100fffffffffff000ffffffffe0");
+textalign(01);
+b=1;
+a=5;
+text(46,127,a);
+event(0);
+while(b==1){
+	waitp();
+	x=penx();
+	y=peny();
+	if((x>62)&&(x<80)&&(y>125)&&(y<132)){
+		a=a+1;
+		Flash(64,126,76,131,0);
+		if(a>5){
+			a=5;
+			beep(3);
+		}
+		rect(0,33,126,61,131,0);
+		text(46,127,a);
+	}
+	if((x>62)&&(x<80)&&(y>132)&&(y<139)){
+		a=a-1;
+		Flash(64,133,76,138,0);
+		if(a<1){
+			a=1;
+			beep(3);
+		}
+		rect(0,33,126,61,138,0);
+		text(46,127,a);
+	}
+	if((x>85)&&(x<127)&&(y>125)&&(y<139)){
+		Flash(86,126,126,138,4);
+		textalign(00);
+		return a;
+	}
+}
+}
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+/$Miner library0e
+Difficulty(){
+	int a,b,n,x,y;
+	m[1]="Class 1-Easiest";
+	m[2]="Class 2-Smooth";
+	m[3]="Class 3-Few Mines";
+	m[4]="Class 4-Rocky";
+	m[5]="Class 5-Dangerous";
+	rect(0,0,0,160,15,0);
+	textalign(1);
+	textattr(2,1,1);
+	text(80,5,"Probe Launch Control");
+	textattr(0,1,0);
+	textalign(0);
+	a=Launch();
+	Splash(0);
+	credits=credits-(a*17000);
+	textattr(1,1,0);
+	text(5,5,"Select an asteroid to mine:");
+	textattr(0,1,0);
+	for (b=1;b<=a;b=b+1){
+		text(10,12+(b*20),"Asteroid "+strupr(strright(hex(random(255)),2)));
+		frame(1,5,10+(b*20),60,25+(b*20),4);
+		dl[b]=random(5)+1;
+		text(65,12+(b*20),m[dl[b]]);
+	}
+	textalign(1);
+	text(80,147,"Hi-Score: "+hiscore+" by "+hiname);
+	textalign(0);
+	n=-1;
+	while (n==-1){
+		waitp();
+		x=penx();
+		y=peny();
+		if((x>4)&&(x<61)){
+		if((y>29)&&(y<46)&&(a>=1)){
+		Flash(5,30,60,45,4);
+		n=1;
+		}
+		if((y>49)&&(y<66)&&(a>=2)){
+		Flash(5,50,60,65,4);
+		n=2;
+		}
+		if((y>69)&&(y<86)&&(a>=3)){
+		Flash(5,70,60,85,4);
+		n=3;
+		}
+		if((y>89)&&(y<106)&&(a>=4)){
+		Flash(5,90,60,105,4);
+		n=4;
+		}
+		if((y>109)&&(y<126)&&(a==5)){
+		Flash(5,110,60,125,4);
+		n=5;
+		}
+		}
+	}
+	diff=dl[n];
+	return;
+}
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+/$Miner library0f
+/*Remind(){
+	int a;
+	a=random(9);
+	saveg();
+	if (a==0)
+		alert("Don't forget to register. Once you have registered, these reminders (and the SUG reminder) will disappear. ");
+	if (a==1)
+		alert("Remember, your registration fees encourage futher software development. Please register.");
+	if (a==2)
+		alert("Visit The Baker Projects at www.Bprojects.com  to register or for help");
+	if (a==3)
+		alert("Please register today. It's secure, easy, and cheap!");
+if (a==4)
+alert("Instant registration available at www.pilotgear.com or www.Bprojects.com.");
+	if (a==5) alert("Please register. It took over 1000 hours  to create this application for you to enjoy.");
+	if (a==6) alert("Remember, if you continue to enjoy this software beyond 30 days you are obligated to register it.");
+	if (a==7) alert("Enjoying a good game? Why not register today?");
+	if (a==8) alert("Is your 30 day trial over? If so, please register today.");
+	restoreg();
+}
+*/
+RegCheck(){
+	int a;
+	string b,regv;
+	b="";
+	version="3.0b3";
+	if (b=="BETA") alert("Thank you for beta testing this software. Please report any problems to miner@ bprojects.com This beta software might contain  errors that  result in data loss or other damage. Do not distribute this version.");
+	a=dbopen("MinerRegV1");
+	if (a!=0){
+		hiscore=dbread("i");
+		hiname=dbread("s");
+		regv=dbread("s");
+		dbclose();
+		if(regv==version) return 1;
+	}
+	saveg();
+/*	if (b=="REG529A")*/
+	a=confirm("I have read and accept the software user agreement (SUG.txt). Pressing YES indicates acceptance of terms and will complete installation of Miner 2149. Thank you for registering.");
+/*	else
+	a=confirm("I have read and accept the software user agreement (SUG.txt). I will register this software if I use it beyond the trial period. Pressing YES indicates acceptance of the these terms. (This reminder will repeat.)");
+*/
+	if (a==0){
+		alert("The software user agreement was not accepted by user. The SUG.txt file contains this agreement. Please remove this program and its files. Press OK to exit.");
+		return 0;
+	}
+
+	if (b=="REG529A"){
+		alert("Thank you again for registering and supporting shareware.");
+	}
+		dbcreate("MinerRegV1");
+		if (hiscore<50000000){
+		hiscore=5000000;
+		hiname="Mr. Nobody";
+		}
+		dbwrite(hiscore);
+		dbwrite(hiname);
+		dbwrite(version);
+		dbclose();
+		hiscore=5000000;
+		hiname="Mr. Nobody";
+		restoreg();
+		return 1;
+	
+
+
+	hiscore="15000000";
+	hiname="Unregistered";
+	restoreg();
+	return 1;
+}
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+/$Miner library1a
+
+Scontrol(){
+bitmap(5,118,"5c7fffffffffffffffffffffe800080010002000400080018000842108421084210852180008811132210847f88b918f"+"009669269270e48049109890086610fc200043b087c18f0081810b42000429085418fe881810fc200043a08101"+"8ff886610302000403083818fe89669231270e4804928987c08811102210847f88a9180008421084210842108"+"42180008001000200040008001fffffffffffffffffffffff80008001000200040008001842084210842108421080018bd08811142220445e880e19668"+"9189251246249e480118db08241050206043b088098a5084210fc21f843709c098a5084210fe21f843b0aa098db082410fd206043708809966892492"+"fd246249e484118bd08991102220445e883e1842085a1084210842108001800080010002000400080017fffffffffffffffffffffe");
+rect(0,4,146,98,158,2);
+frame(1,3,145,99,159,2);
+line(2,64,146,64,158);
+textattr(0,1,0);
+textalign(01);
+text(33,146,oname[oscroll]);
+text(81,146,ocost[oscroll]*65);
+if ((ocost[oscroll]*65)>credits)
+  rect(3,4,146,63,158,2);
+textalign(00);
+}
+
+Lcontrol(){
+textalign(00);
+text(105,15,"Level:");
+bitmap(110,26,"320fffffffffffc100020002000020002000200004000200020000802020f020f008020201020100802020102010080"+"2020f020700803020c020300803020c020300803020c020300403020f820f00200020002000010002000200000fffffffffffc");
+if (level==3)
+	rect(3,146,28,158,39,1);
+if (level==2)
+	rect(3,130,28,143,39,1);
+if (level==1)
+	rect(3,115,28,127,39,1);
+}
+
+Dcontrol(){
+int a;
+a=100*product/((ocount[16]*50000)+(ocount[14]*500));
+text(105,102,"Diridium:");
+if (a<33) bitmap(110,113,"320fffffffffffc10000000100002000000010f8040000000110408000000011340800000001242080000000124208"+"00000001222080000000121208000000012120800000001164040000000110402000000010f8010000000100000fffffffffffc
+");
+ if ((a<66)&&(a>=33))
+bitmap(110,113,"320fffffffffffc10000000100002000000010f80400000001104080000000113408000000012420800000001242080000000"+"1222080000000121208000000013ee080000000119c04000000011fc02000000010f8010000000100000fffffffffffc");
+ if ((a<99)&&(a>=66))
+bitmap(110,113,"320fffffffffffc10000000100002000000010f804000000011040800000001134080000000124208000000013be080000"+"00013de08000000013ee08000000013ee080000000119c04000000011fc02000000010f8010000000100000fffffffffffc");
+ if (a>=99)
+bitmap(110,113,"320fffffffffffc10000000100002000000010f804000000011fc08000000011cc08000000013be08000000013be08000000"+"013de08000000013ee08000000013ee080000000119c04000000011fc02000000010f8010000000100000fffffffffffc");
+textalign(01);
+text(128,115,sellprice);
+textalign(00);
+}
+Controls(){
+int a;
+	frame(1,1,14,103,116,2);
+
+
+textattr(0,1,0);
+Lcontrol();
+text(105,44,"Reports:");
+bitmap(110,55,"320fffffffffffc1000200020000200021802fff0430021982c030820021982a050830221982909082142fffa89108328"+"2800a861082402aaaa891083002800a909082aa2a6aaa05043ff2860ac03020002fffafff010002000200000fffffffffffc
+");
+text(105,73,"Advance:");
+bitmap(110,84,"320fffffffffffc1000200020000200020002000040002000200008004201e2049080042002204908004200220490"+"808420822449080862086246f881e621e62f630808620c6266304086208624630200020002000010002000200000fffffffffffc");
+Dcontrol();
+text(105,131,"Wage:");
+bitmap(110,142,"320fffffffffffc100000000000020000000207004000000000f808000000021fc08000000003fe08000000027ff0800"+"00000000008000000027ff08000000003fe08000000021fc04000000000f80200000002070010000000000000fffffffffffc");
+textalign(01);
+text(128,144,wage);
+textalign(00);
+Scontrol();
+}
+
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+/$Miner library1b
+Startup(){
+	object[0]="0a2104c89e41e03f03f02d0a14408210";
+	oname[0]="Mother Ship";
+	ocost[0]=-1;
+	object[1]="0a000000000000000000000000000000";
+	oname[1]="Clear Area";
+	ocost[1]=-1;
+	object[2]="0a000420000000040000000200008800";
+	oname[2]="Smooth Area";
+	ocost[2]=-1;
+	object[3]= "0a1002800082145000400a0400a10028";
+	oname[3]="Rough Area";
+	ocost[3]=-1;
+	object[4]="0a000204090140220140080010400000";
+	oname[4]="Ore Vein";
+	ocost[4]=-1;
+	object[5]="0a210408bf43f03003003f0bf4408210";
+	oname[5]="Construction";
+	ocost[5]=-1;
+	object[6]="0a0000007804807807f47fc7f43e0000";
+	oname[6]="Bulldozer";
+	ocost[6]=100;
+
+	object[7]="0a210408b343300c00c0330b34408210";
+	oname[7]="Diridium Mine";
+	ocost[7]=700;
+	object[8]="0a2104c89a43f02d03f00c08c4408210";
+	oname[8]=" Hydroponics";
+	ocost[8]=1000;
+	object[9]="0a210210e1c000000000000e1c210210";
+	oname[9]="Tube";
+	ocost[9]=200;
+	object[10]="0a2107f88043b02903a00308047f8210";
+	oname[10]="Life Support";
+	ocost[10]=1000;
+	object[11]="0a2905c88843e02a00801c0944548210";
+	oname[11]="Quarters ";
+	ocost[11]=900;
+	object[12]="0a2105e8b346d85285286d8b345e8210";
+	oname[12]="Space Port";
+	ocost[12]=1000;
+	object[13]="0a2104088c41202102101209244c82d0";
+	oname[13]="Power Plant";
+	ocost[13]=1500;
+	object[14]="0a2105089441403f03f83f4bf4408210";
+	oname[14]="Processor";
+	ocost[14]=1500;
+	object[15]="0a2104088c40c03f03f00c08c4408210";
+	oname[15]="Sickbay";
+	ocost[15]=1200;
+	object[16]="0a2105e89e43b03703b03709e45e8210";
+	oname[16]="Storage";
+	ocost[16]=900;
+	if (loadflg==1){
+	loadflg=0;
+	 return;
+	}
+	credits=1000000;
+	Difficulty();
+	for (a=1;a<101;a=a+1){
+		one[a]=2;
+		two[a]=2;
+		three[a]=2;
+	}
+	three[100]=2;
+	b=random(3)+diff;
+	for(a=0;a<b;a=a+1){
+		one[random(100)]=3;
+		two[random(100)]=3;
+		three[random(100)]=3;
+	}
+	b=(random(7-diff)+(6-diff));
+if (b<1) b=1;
+	for(a=0;a<b;a=a+1){
+		one[random(100)]=4;
+		two[random(100)]=4;
+		three[random(100)]=4;
+		three[random(100)]=4;
+	}
+	two[random(100)]=4;
+	one[random(100)+1]=0;
+	tday=-1;
+	mday=0;
+	level=1;
+	oscroll=6;
+	occ=-1;
+	food=-1;
+	health=-1;
+	drate=0;
+	eff=100;
+	leff=100;
+	product=0;
+	morale=100;
+	lmorale=100;
+	worker=20;
+	lworker=20;
+	jobs=100;
+	ljobs=100;
+	wage=400;
+	life=100;
+	sellprice=random(10)+15;
+	spfloat=sellprice;
+	meff=110-(diff*10);
+crdflg=0;
+}
+DrawMap(){
+	int a,b,c,obj;
+	rect(1,0,0,145,15,4); 
+	title("Mapping ...");
+	a=1;
+	b=2;
+	frame(1,1,14,103,116,2);
+	for (c=15;c<115;c=c+10){
+		rect(3,2,c,102,c+10,1);
+		for (b=2;b<102;b=b+10){
+		if (level==1)
+		obj=one[a];
+		if (level==2)
+		obj=two[a];
+		if (level==3)
+		obj=three[a];
+		if (obj==106)
+			obj=6;
+		if (obj>16)
+			obj=5;
+		bitmap(b,c,object[obj]);
+		a=a+1;
+		}
+	}
+	rect(1,0,0,159,15,0);
+	textattr(1,2,0);
+	text(2,2,"Day:"+mday);
+	text(46,2,"| Credits:"+credits);
+ 	bitmap(147,2,"0ac0c8c40c00001c00c00c00c00c09e4c0c");
+	textattr(0,1,0);
+}
+
+UndoObject(){
+	int a,b;
+	if (lloc!=0){
+		if (llevel==1){
+		a=one[lloc];
+		one[lloc]=lobject;
+		}
+		if (llevel==2){
+		a=two[lloc];
+		two[lloc]=lobject;
+		}
+		if (llevel==3){
+		a=three[lloc];
+		three[lloc]=lobject;
+		}
+		if (a>smax){
+		b=a/100;
+		a=a-(b*100);
+		}
+		credits=credits+(ocost[a]*65);
+	rect(1,0,0,159,15,0);
+	textattr(1,2,0);
+	text(2,2,"Day:"+mday);
+	text(46,2,"| Credits:"+credits);
+ 	bitmap(147,2,"0ac0c8c40c00001c00c00c00c00c09e4c0c");
+	textattr(0,1,0);
+		DrawMap();
+	}
+	if(lloc==0){
+		saveg();
+		alert("There is nothing that can be undone.");
+		restoreg();
+	}
+}
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+/$Miner library1c
+
+
+
+SObject(int x,int y){
+if((y>118)&&(y<131)){
+	if ((x>5)&&(x<21)){
+	oscroll=6;
+	Scontrol();
+	rect(3,6,119,21,131,0);
+	return;
+	}
+	if ((x>21)&&(x<36)){
+	oscroll=7;
+	Scontrol();
+	rect(3,21,119,36,131,0);
+	return;
+	}
+	if ((x>36)&&(x<51)){
+	oscroll=8;
+	Scontrol();
+	rect(3,37,119,51,131,0);
+	return;
+	}
+	if ((x>51)&&(x<66)){
+	oscroll=9;
+	Scontrol();
+	rect(3,52,119,66,131,0);
+	return;
+	}
+	if ((x>66)&&(x<81)){
+	oscroll=10;
+	Scontrol();
+	rect(3,67,119,81,131,0);
+	return;
+	}
+	if ((x>81)&&(x<96)){
+	oscroll=11;
+	Scontrol();
+	rect(3,82,119,96,131,0);
+	return;
+	}
+}
+if((y>131)&&(y<145)){
+	if ((x>5)&&(x<21)){
+	oscroll=12;
+	Scontrol();
+	rect(3,6,132,21,144,0);
+	return;
+	}
+	if ((x>21)&&(x<36)){
+	oscroll=13;
+	Scontrol();
+	rect(3,22,132,36,144,0);
+	return;
+	}
+	if ((x>36)&&(x<51)){
+	oscroll=14;
+	Scontrol();
+	rect(3,37,132,51,144,0);
+	return;
+	}
+	if ((x>51)&&(x<66)){
+	oscroll=15;
+	Scontrol();
+	rect(3,52,132,66,144,0);
+	return;
+	}
+	if ((x>66)&&(x<81)){
+	oscroll=16;
+	Scontrol();
+	rect(3,67,132,81,144,0);
+	return;
+	}
+	if ((x>81)&&(x<96)){
+	Flash(82,132,96,144,0);
+	UndoObject();
+	return;
+	}
+}
+
+}
+MainSetup(){
+	rect(0,0,0,160,160,0);
+	rect(1,0,0,160,15,0);
+	textattr(1,2,0);
+	text(2,2,"Day:"+mday);
+	text(46,2,"| Credits:"+credits);
+ 	bitmap(147,2,"0ac0c8c40c00001c00c00c00c00c09e4c0c");
+	textattr(0,1,0);
+	Controls();
+	SObject(7,120);
+}
+
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+/$Miner library2
+
+CheckPlace(int loc){
+	int old,a,b,c,d;
+	string phrase;
+	b=0;
+	if (level==1){
+		old=one[loc];
+		if((loc-10)>0)
+		if ((one[loc-10]>6)&&(one[loc-10]<17)||(one[loc-10]==0))
+			b=1;
+		if((loc+10)<=100)
+		if((one[loc+10]>6)&&(one[loc+10]<17)||(one[loc+10]==0))
+			b=1;
+		if((loc-1)>0){
+		c=loc/10;
+		d=loc-(c*10);
+		if ((d!=1)&&(((one[loc-1]>6)&&(one[loc-1]<17))||(one[loc-1]==0)))
+			b=1;
+		}
+		if((loc+1)<=100){
+		c=loc/10;
+		if ((loc!=(c*10))&&(((one[loc+1]>6)&&(one[loc+1]<17))||(one[loc+1]==0)))
+		b=1;
+		}
+	}
+	if (level==2){
+		old=two[loc];
+		if((loc-10)>0)
+		if ((two[loc-10]>6)&&(two[loc-10]<17)||(two[loc-10]==0))
+			b=1;
+		if((loc+10)<=100)
+		if((two[loc+10]>6)&&(two[loc+10]<17)||(two[loc+10]==0))
+			b=1;
+		if((loc-1)>0){
+		c=loc/10;
+		d=loc-(c*10);
+		if ((d!=1)&&(((two[loc-1]>6)&&(two[loc-1]<17))||(two[loc-1]==0)))
+			b=1;
+		}
+		if((loc+1)<=100){
+		c=loc/10;
+		if ((loc!=(c*10))&&(((two[loc+1]>6)&&(two[loc+1]<17))||(two[loc+1]==0)))
+		b=1;
+		}
+	}
+	if (level==3){
+		old=three[loc];
+		if((loc-10)>0)
+		if ((three[loc-10]>6)&&(three[loc-10]<17)||(three[loc-10]==0))
+			b=1;
+		if((loc+10)<=100)
+		if((three[loc+10]>6)&&(three[loc+10]<17)||(three[loc+10]==0))
+			b=1;
+		if((loc-1)>0){
+		c=loc/10;
+		d=loc-(c*10);
+		if ((d!=1)&&(((three[loc-1]>6)&&(three[loc-1]<17))||(three[loc-1]==0)))
+			b=1;
+		}
+		if((loc+1)<=100){
+		c=loc/10;
+		if (( loc!=(c*10))&&(((three[loc+1]>6)&&(three[loc+1]<17))||(three[loc+1]==0)))
+		b=1;
+		}
+	}
+	if(old==0){
+		phrase="•Site Number: "+(loc+((level-1)*100))+"\n•Structure: Mother Ship\n•Status: ";
+		if (mday<=21)
+			phrase=phrase+"Operational";
+		else
+			phrase=phrase+"Non-functional";
+		saveg();
+		alert(phrase);
+		restoreg();
+		return 0;
+	}
+	if (old>5){
+		b=old;
+		c=0;
+		if (old>smax){
+			c=old/100;
+			b=old-(c*100);
+		}
+		phrase="•Site Number: "+(loc+((level-1)*100))+"\n•Building:"+oname[b];
+		if (c>0)
+			phrase=phrase+"\n•Status: "+c+" days until construction complete";
+		else
+			phrase=phrase+"\n•Status: Operational";
+		saveg();
+		alert(phrase);
+		restoreg();
+	}
+	if (old==6){
+		saveg();
+		alert("Now why would you want to bulldoze a bulldozer while its bulldozing?");
+		restoreg();
+		return 0;
+	}
+	if (b==0){
+		saveg();
+		alert("You can only build next to a completed structure");
+		restoreg();
+		return 0;
+	}
+	if((old==1)&&(oscroll==6)){
+			saveg();
+			alert("That area is already prepared for building.");
+			restoreg();
+			return 0;
+	}
+	if ((old==3)&&(oscroll==6)){
+		saveg();
+		alert("That terrain is too rocky to bulldoze.");
+		restoreg();
+		return 0;
+	}
+	if ((old==4)&&(oscroll==6)){
+		saveg();
+		a=confirm("Bulldozing that area will destroy the ore vein. Do you really want to place a bulldozer there?");
+		restoreg();
+		if (a==1){
+		return 1;
+		}
+		else
+		return 0;
+	}
+	if ((old!=4)&&(old!=2)&&(old!=1)&&(oscroll>5)){
+		b=old;
+		c=0;
+		if (old>smax){
+			c=old/100;
+			b=old-(c*100);
+		}
+		if (oscroll==6){
+			saveg();
+			a=confirm("Do you want to bulldoze the "+oname[b]+" on this area?");
+			restoreg();
+			if (a==1){
+				return 1;
+			}
+		}
+		return 0;
+	}
+	if ((old!=1)&&(oscroll>7)){
+		saveg();
+		alert("•Site Number: "+(loc+((level-1)*100))+"\n•Building: None\n•Note: You must bulldoze clear the area before building that.");
+		restoreg();
+		return 0;
+	}
+
+
+	if((oscroll==7)&&(old!=4)){
+		saveg();
+		alert("A mine can only be placed on an ore vein.");
+		restoreg();
+		return 0;
+	}
+	return 1;
+}
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+/$Miner library3
+Sell(){
+int a,b,c,x,y;
+saveg();
+rect(0,2,86,108,149,3);
+frame(1,6,90,104,145,3);
+frame(1,4,88,106,147,3);
+bitmap(104,104,"0aa00a00a009005004c04703081c403c00000000000000000000000000000000000000003c1c43084704c0500900a00a00a00");
+bitmap(10,110,"5a0ffffffffffffffffffffc0100000000000000000000202000000000000000010381040000000000000000007c0880"+"00000000000000010fe048000000000000000001ff048000000000000000013ff84800000000000000000000048000000000000000013ff8480000000"+"00000000001ff048000000000000000010fe0440000000000000000007c0820000000000000000103810100000000000000000000200fffffffffffff"+"fffffffc0000000000000000000000000ffffffffe003ffffffffc0100000000100400000000202000000000808000000001040000000004100000000008800381400022006000010048004014000220080000100480041940002201"+"07719900480032540002201094a250048000bd40002201094a3d0048000a140002200894a2100480071d4000220067499d0044000000000410000000000820000000008080000000010100000000100400000000200ffffffffe003ffffffffc0");
+textattr(1,1,0);
+text(14,96,"Select Quantity:");
+textattr(0,1,0);
+
+c=product;
+b=1;
+if (product<1){
+	alert("You currently have no diridium to sell");
+	restoreg();
+	return;
+	b=0;
+}
+if (ocount[12]==0){
+	if (tday!=mday){
+	alert("A space port allows the sale and transfer of diridium to ships. Without a space port, only one sale up to 700 tons can be sold per day.");
+
+	if (product>700) c=700;
+	}
+	else{
+		alert("Prior sale still being transfered. Build a space port or wait until tomorrow to sell more diridium.");
+		c=0;
+		b=0;
+	}
+}
+textalign(01);
+text(49,112,c);
+textalign(00);
+a=c;
+while (b==1){
+while(pstate()==1){
+x=penx();
+y=peny();
+if ((x>81)&&(x<101)&&(y>110)&&(y<117)){
+	if (a>=10000) a=a+10000;
+	if ((a<=10000)&&(a>1000)) a=a+1000;
+	if (a<=1000) a=a+100;
+	if (a>c){
+		a=c;
+		beep(3);
+	}
+	else{
+ beep(7);
+	}
+	rect(0,15,113,80,124,0);
+	textalign(01);
+	text(49,112,a);
+	textalign(00);
+}
+if ((x>81)&&(x<101)&&(y>117)&&(y<125)){
+
+	if (a>=20000) a=a-10000;
+	if ((a<=20000)&&(a>1000)) a=a-1000;
+	if (a<=1000) a=a-100;
+	if (a<0){
+		a=0;
+		beep(3);
+	}
+	else{
+beep(7);
+} 
+	rect(0,15,113,80,124,0);
+	textalign(01);
+	text(49,112,a);
+	textalign(00);
+}
+if((x>11)&&(x<50)&&(y>130)&&(y<141)){
+Flash(11,125,50,141,5);
+	product=product-a;
+	credits=credits+(a*sellprice);
+	alert("Sold! for "+(a*sellprice)+" credits.");
+	b=0;
+	tday=mday;
+}
+if((x>57)&&(x<100)&&(y>130)&&(y<141)){
+Flash(57,125,100,141,5);
+	b=0;
+}
+sleep(10);
+}
+}
+restoreg();
+	rect(1,0,0,159,15,0);
+	textattr(1,2,0);
+	text(2,2,"Day:"+mday);
+	text(46,2,"| Credits:"+credits);
+ 	bitmap(147,2,"0ac0c8c40c00001c00c00c00c00c09e4c0c");
+	textattr(0,1,0);
+	if ((65*ocost[oscroll])>credits){
+	rect(0,4,146,63,158,2);
+	textattr(0,1,0);
+	textalign(01);
+	text(33,146,oname[oscroll]);
+	textalign(00);
+	rect(3,4,146,63,158,2);
+	}
+else{
+	rect(0,4,146,63,158,2);
+	textattr(0,1,0);
+	textalign(01);
+	text(33,146,oname[oscroll]);
+	textalign(00);
+}	
+Dcontrol();
+}
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+/$Miner library4a
+
+PlaceObject(){
+	int x,y,a,b,c;
+	if (oscroll<6){
+		alert("Objects written in reverse text cannot be built.");
+		return;
+	}
+	x=penx();
+	y=peny();
+	if ((x<2)||(y<15)||(x>101)||(y>114))
+		return;
+	b=(y-15)/10;
+	a=((x-2)/10)+1;
+	c=a+(b*10);
+	if (CheckPlace(c)==0)
+		return;
+	if ((ocost[oscroll]*65)>credits){
+		saveg();
+		alert("You do not have enough credits to build that. That module costs "+(ocost[oscroll]*65)+" credits to build.");
+		restoreg();
+		return;
+	}
+	if ((oscroll==12)&&(level!=1)){
+		saveg();
+		alert("Now why would you want to build a landing pad INSIDE an asteroid?");
+		restoreg();
+		return;
+	}
+	if ((oscroll==13)&&(level!=1)){
+		saveg();
+		alert("Mining regulations state a power plant can only be built on the surface  level 1 due to risk of explosion");
+		restoreg();
+		return;
+	}
+	if ((oscroll==14)&&(level!=1)){
+		saveg();
+		alert("Building that here would contaminate life support with toxic fumes. The workers refuse to build that anywhere other than level 1");
+		restoreg();
+		return;
+	}
+	llevel=level;
+	if (level==1){
+		lobject=one[c];
+		lloc=c;
+		one[c]=oscroll+ocost[oscroll];
+	}
+	if (level==2){
+		lobject=two[c];
+		lloc=c;
+		two[c]=oscroll+ocost[oscroll];
+	}
+	if (level==3){
+		lobject=three[c];
+		lloc=c;
+		three[c]=oscroll+ocost[oscroll];
+	}
+	if (oscroll==7){
+		if((level==1)&&(two[c]<=4))
+		two[c]=507+ocost[oscroll];
+		if((level==2)&&(three[c]<=4))
+		three[c]=507+ocost[oscroll];
+	}
+	a=((a-1)*10)+2;
+	b=b*10+15;
+	credits=credits-(ocost[oscroll]*65);
+	if (oscroll<7){
+		bitmap(a,b,object[oscroll]);
+	}
+	else{
+		bitmap(a,b,object[5]);
+	}
+	rect(1,0,0,159,15,0);
+	textattr(1,2,0);
+	text(2,2,"Day:"+mday);
+	text(46,2,"| Credits:"+credits);
+ 	bitmap(147,2,"0ac0c8c40c00001c00c00c00c00c09e4c0c");
+	textattr(0,1,0);
+}
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+/$Miner library4b
+Options(){
+int b,c,p,x,y;
+saveg();
+rect(0,0,13,108,157,3);
+frame(1,4,17,104,153,3);
+frame(1,2,15,106,155,3);
+rect(0,111,56,145,69,0);
+bitmap(104,46,"0aa00a00a009005004c04703081c403c00000000000000000000000000000000000000003c1c43084704c0500900a00a00a00");
+textattr(1,1,1);
+text(20,20,"Options Menu");
+textattr(0,1,0);
+if (asave==1)
+bitmap(20,40,"0bffec06a0a9128a28428a2912a0ac06ffe");
+else
+bitmap(20,40,"0bffe802802802802802802802802802ffe");
+text(35,40,"Autosave");
+if(strleft(object[2],8)=="0a000420")
+bitmap(20,55,"0bffe802802802802802802802802802ffe");
+else
+bitmap(20,55,"0bffec06a0a9128a28428a2912a0ac06ffe");
+text(35,55,"Grid Lines");
+bitmap(20,70,"0bffe80282a832a3a9028a28a28e2802ffe");
+text(35,70,"Save Mine");
+bitmap(20,85,"0bffe80283a81aa2a9028a28a28e2802ffe");
+text(35,85,"Load Mine");
+bitmap(20,100,"0bffe8029f29129129329129129f2802ffe");
+text(35,100,"Exit & Save");
+bitmap(20,115,"0bffe802afaa8aaaaaaaaeaa0abfa802ffe");
+text(35,115,"Resign");
+frame(1,34,137,74,148,4);
+text(48,137,"OK");
+
+while(1==1){
+	waitp();
+	x=penx();
+	y=peny();
+	if((x>19)&&(x<90)){
+		if((y>39)&&(y<52)){
+		Flash(19,40,90,51,0);
+		if (asave==1){
+			alert("WARNING: With autosave disabled, your game will be lost if you change applications without first saving your game.");
+			asave=0;
+			bitmap(20,40,"0bffe802802802802802802802802802ffe");
+		}
+		else{
+			asave=1;
+			bitmap(20,40,"0bffec06a0a9128a28428a2912a0ac06ffe");
+		}
+		restoreg();
+		return;
+		}
+		if((y>54)&&(y<66)&&(strleft(object[2],8)=="0aaa8004")){
+		Flash(19,55,90,65,0);
+		bitmap(35,55,"0bffe802802802802802802802802802ffe");
+		object[2]="0a000420000000040000000200008800";
+		restoreg();
+		DrawMap();
+		return;
+		}
+		if((y>54)&&(y<66)&&(strleft(object[2],8)=="0a000420")){
+		Flash(19,55,90,65,0);
+		bitmap(35,55,"0bffec06a0a9128a28428a2912a0ac06ffe");
+		object[2]="0aaa8004900004820004800084800554";
+		restoreg();
+		DrawMap();
+		return;
+		}
+		if((y>69)&&(y<82)){
+			Flash(19,70,90,81,0);
+			Sfile(2);
+			restoreg();
+			return;
+		}
+		if((y>84)&&(y<97)){
+			Flash(19,85,90,96,0);
+			a=Sfile(1);
+			restoreg();
+			if (a==0)
+				DrawMap();
+			return;
+		}
+		if((y>99)&&(y<112)){
+			Flash(19,100,90,111,0);
+
+			Save("MinerGame",date(1)+time(1));
+			play=5;
+			return;
+		}
+		if((y>114)&&(y<127)){
+			Flash(19,115,90,126,0);
+			b=confirm("Are you sure you want to resign? (This will end your current colony.)");
+			if (b==1) play=0;
+			restoreg();
+			return;
+		}
+	}
+
+if((x>34)&&(x<74)&&(y>137)&&(y<148)){
+	Flash(34,137,74,148,4);
+	restoreg();
+	return;
+	}
+}
+}
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+/$Miner library4c
+
+Report(int a){
+int b,c,d,p,x,y;
+saveg();
+rect(0,0,13,108,157,3);
+frame(1,4,17,104,153,3);
+frame(1,2,15,106,155,3);
+bitmap(104,46,"0aa00a00a009005004c04703081c403c00000000000000000000000000000000000000003c1c43084704c0500900a00a00a00");
+if (a==1){
+textattr(1,1,1);
+text(7,20,"Operations Report");
+textattr(0,1,0);
+text(7,32,"Workers:");
+if((worker-lworker)<0) textattr(0,2,0);
+if(strlen(worker+"("+(worker-lworker)+")")<10)
+text(60,32,worker+"("+(worker-lworker)+")");
+else
+text(53,32,worker+"("+(worker-lworker)+")");
+textattr(0,1,0);
+text(7,43,"Work Force:");
+if(jobs<50) textattr(0,2,0);
+text(60,43,jobs+"%");
+textattr(0,1,0);
+text(7,54,"Morale:");
+if (morale<70) textattr(0,2,0);
+text(60,54,morale+"%("+(morale-lmorale)+")");
+textattr(0,1,0);
+text(7,65,"Wage:");
+text(60,65,wage);
+text(7,76,"Life Support:");
+if (life<80) textattr(0,2,0);
+if(life>0){
+if (life<80) textattr(0,2,0);
+text(60,76,life+"%");
+}
+else
+text(60,76,"---");
+textattr(0,1,0);
+text(7,87,"Food Supply:");
+textattr(0,1,0);
+if(food>0){
+if (food<80) textattr(0,2,0);
+text(60,87,food+"%");
+}
+else
+text(60,87,"---");
+textattr(0,1,0);
+text(7,98,"Health:");
+if(health>0){
+if (health<80) textattr(0,2,0);
+text(60,98,health+"%");
+}
+else
+text(60,98,"---");
+textattr(0,1,0);
+text(7,109,"Occupancy:");
+if(occ>0){
+if (occ>120) textattr(0,2,0);
+text(60,109,occ+"%");
+}
+else
+text(60,109,"---");
+textattr(0,1,0);
+text(7,120,"Death Rate:");
+if (drate>20) textattr(0,2,0);
+text(60,120,drate+"%");
+textattr(0,1,0);
+}
+if (a==2){
+b=ocount[6]+(ocount[7]*5)+(ocount[8]*5)+(ocount[10]*7)+(ocount[12]*1)+(ocount[14]*10)+(ocount[15]*3)+(ocount[16]*1);
+	c=100*(ocount[13]*100)/b;
+	if ((c>100)||(mday<21)) c=100;
+	p=(ocount[7]*eff*30*15)*meff/100;
+	if (p>(ocount[14]*eff*30*60))
+		p=ocount[14]*eff*30*60;
+	p=(p*sellprice)+(product*sellprice)+credits-(wage*worker*30);
+	d=(((ocount[7]*eff*15)*meff)/(ocount[14]*eff*60));
+rect(0,111,56,129,69,0);
+textattr(1,1,1);
+text(7,20,"Production Report");
+textattr(0,1,0);
+text(7,34,"Asteroid:");
+text(55,34,"Class "+diff);
+text(7,46,"# of Mines:");
+text(55,46,ocount[7]);
+text(7,58,"Processors:");
+if (ocount[14]>0){
+if (d>100)
+textattr(0,2,0);
+text(55,58,d+"%");
+}
+else
+text(55,58,"None");
+textattr(0,1,0);
+text(7,70,"Storage:");
+if (100*product/((ocount[16]*50000)+(ocount[14]*500))==100) textattr(0,2,0);
+text(55,70,(100*product/((ocount[16]*50000)+(ocount[14]*500)))+"%");
+textattr(0,1,0);
+text(7,82,"Power:");
+if (c<90) textattr(0,2,0);
+text(55,82,c+"%");
+textattr(0,1,0);
+text(7,94,"Diridium:");
+if (product<100000)
+	text(55,94,product+" tons");
+else
+	text(55,94,product+" tns");
+text(7,106,"30-Day:");
+if(p<0) textattr(0,2,0);
+text(55,106,p);
+textattr(0,1,0);
+text(7,118,"(Projected Credits)");
+}
+frame(1,34,137,74,148,4);
+text(48,137,"OK");
+while(1==1){
+	waitp();
+	x=penx();
+	y=peny();
+	if((x>34)&&(x<74)&&(y>137)&&(y<148)){
+	Flash(34,137,74,148,4);
+	restoreg();
+	return;
+	}
+}
+}
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+/$Miner library4d
+Action(){
+	int a,b,c,x,y;
+	event(2);
+	waitp();
+	x=penx();
+	y=peny();
+	if ((x>1)&&(x<103)&&(y>14)&&(y<116)){
+		PlaceObject();
+beep(7);
+		return 0;
+}
+	if ((x>5)&&(x<96)&&(y>118)&&(y<144)){
+		SObject(x,y);
+beep(7);
+		return 0;
+	}
+if (x>144){
+	if(y<16){
+	Flash(146,0,159,15,3);
+	Info();
+	MainSetup();
+	DrawMap();
+	}
+	if ((y>=26)&&(y<=41)){
+	level=3;
+	Lcontrol();
+beep(7);
+	DrawMap();
+	return 0;
+	}
+	if ((y>=55)&&(y<=70)){
+	Flash(145,56,158,69,0);
+	Options();
+	return 0;
+	}
+	if((y>=84)&&(y<=99)){
+	Flash(145,85,158,98,0);
+	return 14;
+	}
+	if ((y>=113)&&(y<=128)){
+	Flash(145,114,158,127,0);
+	Sell();
+	return 0;
+	}
+	if((y>=142)&&(y<149)){
+	Flash(145,143,158,149,0);
+	wage=wage+50;
+	if (wage>90000) wage=90000;
+	rect(0,114,143,143,156,0);
+	textalign(01);
+	text(128,144,wage);
+	textalign(00);
+	return 0;
+	}
+	if((y>=149)&&(y<=157)){
+	Flash(145,149,158,157,0);
+	wage=wage-50;
+	if (wage<0) wage=0;
+	rect(0,114,143,143,156,0);
+	textalign(01);
+	text(128,144,wage);
+	textalign(00);
+	return 0;
+	}
+}
+if ((x>129)&&(x<144)){
+	if ((y>=26)&&(y<=41)){
+	level=2;
+	Lcontrol();
+beep(7);
+	DrawMap();
+	return 0;
+	}
+	if ((y>=55)&&(y<=70)){
+	Flash(130,56,143,69,0);
+	Report(2);
+	return 0;
+	}
+	if((y>=84)&&(y<=99)){
+	Flash(130,85,143,98,0);
+	return 7;
+	}
+}
+if ((x>114)&&(x<129)){
+	if ((y>=26)&&(y<=41)){
+	level=1;
+	Lcontrol();
+beep(7);
+	DrawMap();
+	return 0;
+	}
+	if ((y>=55)&&(y<=70)){
+	Flash(114,56,128,69,0);
+	Report(1);
+	return 0;
+	}
+	if((y>=84)&&(y<=99)){
+	Flash(114,85,128,98,0);
+	return 1;
+	}
+}
+beep(3);
+return 0;
+}
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+/$Miner library5a
+
+EndGame(int a){
+	int b;
+	if (a==5) {
+	exit();
+	return 0;
+	}
+	Splash(0);
+	textattr(2,1,1);
+	textalign(1);
+	text(80,5,"Game Over");
+	dbopen("MinerGame");
+	dbdelete();
+	textattr(0,1,0);
+	if (a==0){
+		text(80,40,"Mission Status: RESIGNED on day "+mday);
+		text(80,55,"Credits Remaining: "+credits);
+		frame(1,5,35,155,70,3);
+	}
+	if (a==2){
+		text(80,40,"Mission Status: FAILURE on day "+mday);
+		text(80,55,"Cause: Insufficient Funds");
+		frame(1,5,35,155,70,3);
+	}
+	if (a==4){
+		text(80,40,"Mission Status: FAILURE on day "+mday);
+		text(80,55,"Cause: Worker Revolt");
+		frame(1,5,35,155,70,3);
+	}
+	if (a==3){
+		textalign(0);
+		text(25,25,"Mission Status: COMPLETE");
+		text(25,38,"Credits Earned: "+credits);
+		text(25,51,"Product Remaining: "+product);
+		text(25,64,"Current Selling Price: "+sellprice);
+		credits=credits+(product*sellprice);
+		text(25,77,"Total Credits: "+credits);
+	frame(1,22,24,138,90,3);
+		frame(1,55,105,105,117,3);
+		textalign(1);
+		text(80,105,"Continue");
+		waitp();
+		Flash(55,105,105,117,3);
+		a=random(3);
+		saveg();
+		if (a==0) alert("You have completed your mission. The mine soon will be turned into an amusement park. ");
+		if (a==1) alert("You have completed your mission. The mine soon will be turned into a luxury hotel and spa");
+		if (a==2) alert("You have completed your mission. The mine soon will be turned into a military base.");
+		if (credits>hiscore){
+			alert("Congratulations, you have earned a personal record on this mine!");
+		hiscore=credits;
+		a=10;
+		while (a>8){
+			hiname=gets("Enter your name below (max=8):");
+			a=strlen(hiname);
+		}
+		a=dbopen("MinerRegV1");
+		if (a==0)
+			alert("If your had registered, you could have saved your name as a high score.");
+		else{
+			dbclose();
+			dbcreate("MinerRegV1");
+			dbwrite(hiscore);
+			dbwrite(hiname);
+			dbwrite(version);
+			dbclose();
+	rect(0,2,146,158,158,3);
+	textalign(1);
+	text(80,146,"Hi Score:"+hiscore+" by "+hiname);
+	textalign(0);
+					if (credits>200000000)
+	 			alert("Your score is high enough for the Tycoon Club. Only registered users may send the total score and score code to our website. Score Code="+hex(credits/537)+"-"+diff+"-30. Write it down now.");
+		}
+		}	
+	restoreg();
+	}
+	rect(0,54,104,106,118,3);
+	textalign(1);
+	frame(1,22,97,68,109,3);
+	text(45,97,"New Mine");
+	frame(1,91,97,138,109,3);
+	text(115,97,"Load Mine");
+		frame(1,60,114,100,126,3);
+	text(80,114,"Quit");
+	b=0;
+	while(b==0){
+		waitp();
+		x=penx();
+		y=peny();
+		if ((x>=22)&&(x<=68)&&(y>=97)&&(y<=109)){
+		Flash(22,97,68,109,3);
+		return 1;
+		}
+		if ((x>=60)&&(x<=100)&&(y>=114)&&(y<=126)){
+		Flash(60,114,100,126,3);
+		return 0;
+		}
+		if((x>=91)&&(x<=138)&&(y>=97)&&(y<=109)){
+		Flash(91,97,138,109,3);
+		saveg();
+			rect(0,0,13,108,157,3);
+		frame(1,4,17,104,153,3);
+		frame(1,2,15,106,155,3);
+			loadflg=Sfile(1)+1;
+			restoreg();
+			if (loadflg==1) return 1;
+		restoreg();
+		}
+	}
+}
+
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+/$Miner library5b
+Update(int a){
+int b;
+float c,d;
+string warn;
+warn="";
+credits=credits-(worker*wage*a);
+if (mday<21) {
+	c=morale;
+	d=a;
+	c=c+(d*(wage-(sellprice*(21+diff)))/200);
+	morale=((morale*2)+c)/3;
+	if (morale>100) morale=100;
+	return;
+}
+/* morale */
+c=morale;
+d=a;
+if (food<90) c=c-(d/3);
+if (food>99) c=c+ (d/6);
+if (food<70) c=c-(d/3);
+if (occ>150) c=c-(d/6);
+if (occ>200) c=c-(d/3);
+if (occ<60) c=c+(d/6);
+c=c+(d*(wage-(sellprice*(22+diff)))/100);
+c=c+(2*d*(100-jobs)/100);
+if (drate>5) c=c-(d/4);
+if (drate>15) c=c-(d/3);
+if (drate<1) c=c+(d/6);
+if (health>99) c=c+(d/6);
+if (health<90) c=c-(d/3);
+if (health<70) c=c-(d/3);
+	if (life<90) c=c-(d/3);
+	morale=(morale+c)/2;
+	if (morale>100) morale=100;
+	if (morale<0) morale=0;
+	if ((morale<60)&&(morale>29)&&(random(10)==1))
+		alert("NEWS FLASH:Riots are breaking out all over! Workers are revolting against poor working conditions.");
+	if(morale<30)
+		alert("NEWS FLASH: Workers threatening to remove you from the station unless working conditions are improved quickly.");
+/* worker */
+b=0;
+b=b+(a*(wage-(700*sellprice/(17-(2*diff))))/700);
+if (morale>89) b=b+(2*a);
+if (morale<80) b=b-(2*a);
+if (jobs<80) b=b+(3*a);
+if (jobs>99) b=b-(3*a);
+	lworker=worker;
+	worker=worker-(worker*drate/100*a/365);
+	worker=worker+(b*(worker+1)/100);
+	if (worker<1) worker=1;
+/* jobs */
+	b=(ocount[5]*5)+ocount[6]+(ocount[7]*30)+(ocount[8]*12)+(ocount[10]*15)+ocount[11]+(ocount[12]*20)+(ocount[13]*30)+(ocount[14]*20)+(ocount[15]*12)+(ocount[16]*12);
+	ljobs=jobs;
+	if (b>0)
+	jobs=worker*100/b;
+	else
+	jobs=worker*100;
+/* eff */
+	c=0;
+b=ocount[6]+(ocount[7]*5)+(ocount[8]*5)+(ocount[10]*7)+(ocount[12]*1)+(ocount[14]*10)+(ocount[15]*3)+(ocount[16]*1);
+	c=100*(ocount[13]*100)/b;
+	if (c<80) {
+		warn=warn+", Brownouts";
+	}
+	if ((ocount[13]==0)&&(mday>21)) {
+		warn=warn+" (now on emergency batteries)";
+	}
+	if (c>100) c=100;
+	eff=((c*jobs/100)+eff)/2;
+	if (eff>100) eff=100;
+	if (eff<0) eff=0;
+/* product */
+	b=(ocount[7]*eff*a*15)*meff/100;
+	if (b>(ocount[14]*eff*a*60))
+		b=ocount[14]*eff*a*60;
+	product=product+b;
+	if (product>((ocount[16]*50000)+(ocount[14]*500)))
+		product=(ocount[16]*50000)+(ocount[14]*500);
+/* sellprice */
+	b=0;
+	c=random(50);
+	if (c==0){
+	spfloat=spfloat+(spfloat*((random(3)+5)*a)/100);
+	alert("NEWS FLASH:Pirates are stealing cargos of diridium, prices have risen.");
+	}
+	if (c==1){
+spfloat=spfloat-(spfloat*((random(3)+5)*a)/100);
+	alert("NEWS FLASH: Large vein of diridium discovered, prices falling.");
+	}
+	if(c>1){
+	if(spfloat>10) spfloat=spfloat+(spfloat*((random(4)-2)*a)/100);
+	if(spfloat<=10) spfloat=spfloat+((random(3)-1)*a);
+	}
+if (spfloat>50) spfloat=spfloat-5;
+	if (spfloat<5) spfloat=5;
+	if ((spfloat<10)&&(random(3)==1)) spfloat=spfloat+(a/10);
+	sellprice=spfloat;
+/* occupancy */
+	if (ocount[11]>0)
+		occ=100*worker/(ocount[11]*150);
+	else
+		occ=-1;
+/* food */
+	if (ocount[8]>0)
+		food=(food+(100*(ocount[8]*200)/worker))/2;
+	else
+		food=-1;
+	if (food>100) food=100;
+/* health */
+	if (ocount[15]>0){
+		b=100*(ocount[15]*300)/worker;
+	health=(b+health)/2;
+	}
+	else
+		health=-1;
+	if (health>100) health=100;
+/* drate */
+	if (ocount[10]>0)
+	life=(life+(100*(ocount[10]*400)/worker))/2;
+	else 
+		life=-1;
+	if (life>100) life=100;
+	if ((life>0)&&(ocount[13]==0)) life=life*2/3;
+	b=0;
+	if (life>90) b=b-a;
+	if (life<70) b=b+(a/2);
+	if (life<50) {
+		b=b+a;
+		warn=warn+", Low Life Support";
+	if (life==-1) b=b+a;
+	}
+	if (life==-1) b=b+a;
+	if (food>90) b=b-a;
+	if (food<50) b=b+a;
+	if (food<80){
+		b=b+(a/2);
+		warn=warn+", Low Food Supply";
+	}
+	if (health>90) b=b-a;
+	if (health<80){
+		b=b+(a/2);
+		warn=warn+", Poor Health";
+	}
+	if (health<30) b=b+a;
+	drate=((drate*2)+b)/2;
+	if (drate>100) {
+		alert("NEWS FLASH:With the asteriod mine death rate rising to 100%, the Space Guard has intervened to rescue the remaining workers. A reward is offered for the capture of those responsible.");
+		EndGame(0);
+		drate=100;
+	}
+	if (drate<0) drate=0;
+/* warning */
+	if (warn!="") {
+		warn=strright(warn,strlen(warn)-1);
+		alert("WARNING:"+warn+" threatening the mining operation.");
+	}
+}
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+/$Miner library6
+
+Blast(int c,int f){
+	int a,b,d,e,loc;
+	loc=-1;
+	b=-1;
+/* find building */
+	for (a=1;a<101;a=a+1){
+		if ((one[a]==c)&&(f==1)){
+			b=a;
+			if (random(2)==1)
+			loc=b;
+		}
+		if ((two[a]==c)&&(f==2)){
+			b=a;
+			if (random(2)==1)
+			loc=b;
+		}
+		if ((three[a]==c)&&(f==3)){
+			b=a;
+			if (random(2)==1)
+			loc=b;
+		}
+	}
+/* return if building not present */
+	if (b==-1)
+		return 1;
+	if (loc==-1)
+		loc=b;
+/* blow site */
+	if (f==1)
+	one[loc]=3-random(2);
+	if (f==2)
+	two[loc]=3-random(2);
+	if (f==3)
+	three[loc]=3-random(2);
+	if ((f>1)||(c==7)) return 0;
+
+	if((loc-10)>0){
+		if (random(3)==1)
+			one[loc-10]=3-random(2);
+	}
+	if((loc+10)<=100){
+		if (random(3)==1)
+			one[loc+10]=3-random(3);
+	}
+	if((loc-1)>0){
+		e=loc/10;
+		d=loc-(e*10);
+		if (d!=1){
+			if (random(3)==1)
+				one[loc-1]=3-random(3);
+		}
+	}
+	if((loc+1)<=100){
+		e=loc/10;
+		if (loc!=(e*10)){
+			if (random(4)==1)
+				one[loc+1]=3-random(3);
+		}
+	}
+	return 0;
+}
+
+Disaster(){
+	int a,b,c,d;
+/*	if ((hiname=="Unregistered")&&(random(20)==1)) Remind();
+*/
+/*(random(20*(6-diff))*/
+	if (((random(20*(6-diff)==1))&&(mday>21))||(bstate()==-1)){
+		a=random(7);
+		if (a==0){
+			b=random(10*diff);
+			b=product*b/100;
+			product=product-b;
+			alert("DISASTER: Pirate raiders have stolen "+b+" tons of processed diridium.");
+			return;
+		}
+		if (a==1){
+			b=10+random(4*diff);
+			b=Storm(b);
+			for(c=1;c<b;c=c+1){
+			one[random(100)]=3;
+			}
+if (b>0)
+alert("NEWS FLASH: Colony hit by "+b+" meteors. Check for damage.");
+else alert("NEWS FLASH: Disaster avoided!");
+			restoreg();
+			DrawMap();
+			saveg();
+			return;
+		}
+		if ((a==2)&&(ocount[12]>0)){
+			b=Blast(12,1);
+			if (b==0){
+			Crash();
+				alert("DISASTER: There has been a crash in the space port. Nearby buildings might be damaged or destroyed.");
+			ocount[12]=ocount[12]-1;
+			restoreg();
+			DrawMap();
+			saveg();
+			return;
+			}
+		}
+		if ((a==3)&&(ocount[13]>0)){
+			b=Blast(13,1);
+			if (b==0){
+			Pexplode();
+				alert("DISASTER: The power plant has overloaded and exploded. Nearby buildings destroyed");
+			restoreg();
+			DrawMap();
+			saveg();
+			return;
+			}
+		}
+		if (a==4){
+			b=worker/ocount[15];
+			b=b*(random(diff)+1)/25;
+			worker=worker-b;
+			drate=drate+(100*b/worker);
+			alert("DISASTER: A plague has struck. Sickbays are full. "+b+" workers have died.");
+			return;
+		}
+		if (a==5){
+			alert("DISASTER: Radiation storm!  Workers' health and efficiency have dropped significantly. ");
+			health=health/3;
+			eff=eff/3;
+			drate=drate+5;
+		}
+	 	if (a==6){
+			b=random(3)+1;
+			d=random(10)+10;
+			if(d>=worker) d=worker-1;
+			c=Blast(7,b);
+			if (c==0){
+				Cavein();
+				alert("DISASTER: Mine cave in on level "+b+". Mine destroyed."+d+" workers killed.");
+				worker=worker-d;
+			restoreg();
+				if(b==level)
+				DrawMap();
+				saveg();
+			}
+		}
+	}
+}
+
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+/$Miner library7
+
+Advance(int a){
+	int b,c,d,e,f,x,y,obj;
+	x=2;
+	y=15;
+	lworker=worker;
+	lmorale=morale;
+	ljobs=jobs;
+	lloc=0;
+	for (b=0;b<17;b=b+1){
+	ocount[b]=0;
+	}
+	mday=mday+a;
+	rect(1,0,0,145,15,4); 
+	title("Updating ...    	"); 
+	frame(1,1,14,103,116,2);
+	rect(3,2,15,102,25,2);
+	if (asave==1) b=dbcreate("MinerGame");
+	if (b==0){
+		saveg();
+		alert("Error: Unable to save game. Check available system memory.");
+		restoreg();
+	}
+	lloc==0;
+	for (b=1;b<101;b=b+1){
+		if (one[b]>17){
+		one[b]=one[b]-(a*100);
+		if (one[b]<0){
+			c=one[b]/100;
+			one[b]=one[b]-(c*100);
+			one[b]=100+one[b];
+		}
+		if (one[b]==6)
+			one[b]=1;
+		}
+		if (two[b]>17){
+		two[b]=two[b]-(a*100);
+		if (two[b]<0){
+			c=two[b]/100;
+			two[b]=two[b]-(c*100);
+			two[b]=100+two[b];
+		}
+		if (two[b]==6)
+			two[b]=1;
+		}
+		if (three[b]>17){
+		three[b]=three[b]-(a*100);
+		if (three[b]<0){
+			c=three[b]/100;
+			three[b]=three[b]-(c*100);
+			three[b]=100+three[b];
+		}
+		}
+		if (three[b]==6)
+			three[b]=1;
+		if (level==1)
+		obj=one[b];
+		if (level==2)
+		obj=two[b];
+		if (level==3)
+		obj=three[b];
+		if (obj==106)
+			obj=6;
+		if (obj>16)
+			obj=5;
+		bitmap(x,y,object[obj]);
+		x=x+10;
+		if (x>=101){
+		x=2;
+		y=y+10;
+		if (y<115)
+			rect(3,x,y,x+100,y+10,1);
+		}
+		
+		if ((one[b]<17)&&(one[b]>=0))
+			ocount[one[b]]=ocount[one[b]]+1;
+		if ((two[b]<17)&&(two[b]>=0))
+			ocount[two[b]]=ocount[two[b]]+1;
+		if ((three[b]<17)&&(three[b]>=0))
+			ocount[three[b]]=ocount[three[b]]+1;
+	if (asave==1){
+	dbwrite(one[b]);
+	dbwrite(two[b]);
+	dbwrite(three[b]);
+	}
+	}
+	b=random(700);
+	saveg();
+	if (b==0){
+		c=random(90)+5;
+		alert("NEWS FLASH: Strange electromagnetic storm causes time shift. Time suddenly advances "+c+" days.");
+		mday=mday+c;
+	}
+	if ((b==1)||((ocount[4]==0)&&(random(17-a)==1))){
+		e=random(3)+1;
+		f=0;
+		for (c=1;c<3;c=c+1){
+		d=random(99)+1;
+		if ((e==1)&&(one[d]<4)){
+			one[d]=4;
+			f=1;
+		}
+		if ((e==2)&&(two[d]<4)){
+			two[d]=4;
+			f=1;
+		}
+		if ((e==3)&&(three[d]<4)){
+			three[d]=4;
+			f=1;
+		}
+		}
+		if (f==1) {
+		alert("NEWS FLASH: Geologic survey discovers new diridium veins on level "+e+".");
+		if(e==level) DrawMap();
+		}
+	}
+	if ((b==2)&&(eff<100)){
+		alert("NEWS FLASH: New processor technology temporarily boosts mining efficiency to 100%");
+		eff=100;
+	}
+	if (b==3){
+		alert("NEWS FLASH: Alien artifact discovered! News of discovery boosts morale to 100%");
+		morale=100;
+	} 
+	if (b==4){
+		c=random(100)*50;
+		alert("NEWS FLASH: Rich diridium vein discovered. Stored diridium increased by "+c+" tons.");
+		product=product+c;
+	}
+	if ((b==5)&&(credits>30000)&&(meff<100)){
+		c=(random(15)+15)*1000;
+		e=confirm("  A visitor claiming to be an engineer has offered to increase the daily output of your mines for "+c+" credits. Will you pay for this service?");
+		if (e==1){
+		credits=credits-c;
+		if(random(3)>1){
+		alert("  Modifications complete. Mining efficiency improved by up to 20%.");
+		meff=meff+20;
+		if (meff>100) meff=100;
+		}
+		else
+		alert("  You've been swindled! The visitor took your money and fled. Too bad you can't trust everyone.");
+		}
+	}
+	if (b==6){
+		c=(random(diff)*10)+10;
+		alert("NEWS FLASH: Workers are leaving for a better work offer at a rival mining company. "+c+"% of workers have left your mining colony.");
+		worker=worker-(worker*c/100);
+	}
+	Update(a);
+	Disaster();
+	restoreg();
+	rect(1,0,0,159,15,0);
+	textattr(1,2,0);
+	text(2,2,"Day:"+mday);
+	text(46,2,"| Credits:"+credits);
+ 	bitmap(147,2,"0ac0c8c40c00001c00c00c00c00c09e4c0c");
+	textattr(0,1,0);
+	if (asave==1){
+	dbwrite(mday);
+	dbwrite(level);
+	dbwrite(oscroll);
+	dbwrite(credits);
+	dbwrite(eff);
+	dbwrite(product);
+	dbwrite(lmorale);
+	dbwrite(morale);
+	dbwrite(lworker);
+	dbwrite(worker);
+	dbwrite(jobs);
+	dbwrite(wage);
+	dbwrite(life);
+	dbwrite(sellprice);
+	dbwrite(occ);
+	dbwrite(food);
+	dbwrite(health);
+	dbwrite(drate);
+	dbwrite(crdflg);
+	dbwrite(diff);
+	dbwrite(meff);
+	dbclose();
+	}
+	Dcontrol();
+}
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+/$Miner library8
+
+CheckEvent(){
+	int a,b;
+	if((morale<30)&&(random(11)<diff)){
+	alert("DISASTER: You have been forced out of an airlock by angry workers! At least the workers let you put your suit and helmet on first. A nearby ship rescues you.");
+	return 4;
+	}
+	a=0;
+
+	if (((credits+(product*sellprice))<0)&&(credits<0)){
+		saveg();
+		alert(" You do not have enough processed diridium to cover your debts. ");
+		if (crdflg<(6-diff)){
+			alert("Your credit has been extended to cover "+(0-credits)+" credits in debt. A lein is place on future processed ore. Cut costs immediately!");
+				product=product+(credits/sellprice);
+				credits=0;
+				crdflg=crdflg+1;
+				restoreg();
+				Dcontrol();
+		if(crdflg>=(6-diff)){
+			saveg();
+			alert("WARNING:Your creditors refuse any future extension of your credit. Watch your expenses carefully.");
+			restoreg();
+		}
+	rect(1,0,0,159,15,0);
+	textattr(1,2,0);
+	text(2,2,"Day:"+mday);
+	text(46,2,"| Credits:"+credits);
+ 	bitmap(147,2,"0ac0c8c40c00001c00c00c00c00c09e4c0c");
+	textattr(0,1,0);
+				return 1;
+			}
+		else {
+			alert("Your creditors will not exend you further credit. You have been terminated and creditors have taken over your mining operation. Don't ask for any recommendation letters.");
+			return 2;
+		}
+	}
+		if (mday<730)
+			return 1;
+		else
+			return 3;
+
+}
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
